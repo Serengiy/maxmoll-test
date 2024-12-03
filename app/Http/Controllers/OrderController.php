@@ -37,6 +37,7 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
+            $orderIds = [];
             foreach ($data['order_items'] as $orderItem) {
                 $product = Product::query()->with('stocks')->where('id', $orderItem['product_id'])->first();
 
@@ -74,11 +75,15 @@ class OrderController extends Controller
 
                     $stock->decrement('stock', $deducted);
                     $remainingCount -= $deducted;
+                    $orderIds[] = $order->id;
                 }
                 logger()->info('Remaining stock after loop: ' . $product->stocks->sum('stock') . ' Required: ' . $requiredCount);
             }
             DB::commit();
-            return response()->json(['message' => 'Order created successfully!'], 201);
+            return response()->json([
+                'message' => 'Order created successfully!',
+                'order_ids' => $orderIds,
+            ], 201);
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
@@ -157,6 +162,9 @@ class OrderController extends Controller
     public function cancel(int $id): JsonResponse
     {
         $order = Order::query()->findOrFail($id);
+
+        if($order->status !== Order::STATUS_ACTIVE)
+            return response()->json(['message' => 'Only active orders can be cancelled!'], 400);
 
         DB::beginTransaction();
         try{

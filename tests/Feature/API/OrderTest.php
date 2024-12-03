@@ -102,6 +102,7 @@ class OrderTest extends TestCase
             ],
         ]);
 
+        dd($response->json());
         if($products->stocks->sum('stock') < $count)
             $response->assertStatus(400);
         else

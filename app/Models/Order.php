@@ -37,7 +37,9 @@ class Order extends Model
         }
 
         if($completedAt = $filters['completed_at'] ?? null) {
-            $query->whereDate('completed_at', $completedAt);
+            $startOfDay = \Carbon\Carbon::parse($completedAt)->startOfDay();
+            $endOfDay = \Carbon\Carbon::parse($completedAt)->endOfDay();
+            $query->whereBetween('completed_at', [$startOfDay, $endOfDay]);
         }
 
         if($warehouseId = $filters['warehouse_id'] ?? null) {

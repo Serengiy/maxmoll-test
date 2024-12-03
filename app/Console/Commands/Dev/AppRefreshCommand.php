@@ -18,6 +18,7 @@ class AppRefreshCommand extends Command
      */
     public function handle(): void
     {
+        $this->call('migrate');
         $this->call('migrate:refresh');
         $this->call('db:seed');
     }

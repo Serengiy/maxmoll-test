@@ -17,6 +17,7 @@ class OrderResource extends JsonResource
         return [
             'id' => $this->id,
             'customer' => $this->customer,
+            'warehouse_id' => $this->warehouse_id,
             'count' => $this->product->first()?->pivot?->count,
             'product' => $this->whenLoaded('product', fn() => new ProductResource($this->product->first())),
             'warehouse' => $this->whenLoaded('warehouse', fn() => new WarehouseResource($this->warehouse)),
